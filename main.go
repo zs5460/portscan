@@ -15,8 +15,7 @@ var (
 	wg sync.WaitGroup
 )
 
-// TestPort ...
-func TestPort(addr string) bool {
+func isOpen(addr string) bool {
 	conn, err := net.DialTimeout("tcp", addr, time.Second*2)
 	if err != nil {
 		//log.Println(err)
@@ -26,14 +25,14 @@ func TestPort(addr string) bool {
 	return true
 }
 
-func Scan(ip string, ports []string) {
+func scan(ip string, ports []string) {
 	limit := make(chan struct{}, 1000)
 	for _, p := range ports {
 		go func(addr string) {
 			limit <- struct{}{}
 			//fmt.Println("scan ", addr)
 			wg.Add(1)
-			if TestPort(addr) {
+			if isOpen(addr) {
 				fmt.Printf("%s is open\n", addr)
 			}
 			wg.Done()
@@ -45,7 +44,7 @@ func Scan(ip string, ports []string) {
 func QuickScan(ip string) {
 	commonPorts := "21,22,23,25,53,80,110,135,137,138,139,443,1433,1434,1521,3306,3389,5000,5432,5632,6379,8000,8080,8081,9090,10051,11211,27017"
 	ports := strings.Split(commonPorts, ",")
-	Scan(ip, ports)
+	scan(ip, ports)
 }
 
 func FullScan(ip string) {
@@ -54,7 +53,7 @@ func FullScan(ip string) {
 		tmp[i] = strconv.Itoa(i + 1)
 	}
 	ports := tmp[:]
-	Scan(ip, ports)
+	scan(ip, ports)
 }
 
 func main() {
@@ -74,19 +73,21 @@ func main() {
 
 	fmt.Println(banner)
 
-	flag.StringVar(&ip, "ip", "localhost", "ip addr to portscan")
+	flag.StringVar(&ip, "ip", "localhost", "IP address to scan")
 	flag.BoolVar(&quickMode, "q", false, "Quick mode scans only common ports")
 	flag.Parse()
 
+	startTime := time.Now()
 	if quickMode {
-		fmt.Println("start quickscan...")
+		fmt.Println("Start a quick scan...")
 		QuickScan(ip)
 	} else {
-		fmt.Println("start fullscan...")
+		fmt.Println("Start a full scan...")
 		FullScan(ip)
 	}
 
 	wg.Wait()
 
-	fmt.Println("scan finished!")
+	takes := time.Since(startTime).Truncate(time.Millisecond)
+	fmt.Printf("Scan completed,it took %s.\n\n", takes)
 }
