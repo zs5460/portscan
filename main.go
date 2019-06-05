@@ -70,9 +70,13 @@ func main() {
 
 	fmt.Println(banner)
 
-	flag.StringVar(&ip, "ip", "localhost", "IP address to scan")
+	flag.StringVar(&ip, "ip", "", "IP address to scan")
 	flag.BoolVar(&fullMode, "f", false, "Full scan mode scans all ports, the default is off, the default only scans common ports")
 	flag.Parse()
+	if ip == "" {
+		flag.Usage()
+		return
+	}
 
 	startTime := time.Now()
 	if fullMode {
