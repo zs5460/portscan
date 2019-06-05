@@ -12,7 +12,9 @@ import (
 )
 
 var (
-	wg sync.WaitGroup
+	wg        sync.WaitGroup
+	maxThread int
+	result    = make(chan string, 64)
 )
 
 func isOpen(addr string) bool {
@@ -24,13 +26,13 @@ func isOpen(addr string) bool {
 }
 
 func scan(ip string, ports []string) {
-	limit := make(chan struct{}, 1000)
+	limit := make(chan struct{}, maxThread)
 	for _, p := range ports {
 		limit <- struct{}{}
 		go func(addr string) {
 			wg.Add(1)
 			if isOpen(addr) {
-				fmt.Printf("%s is open\n", addr)
+				result <- fmt.Sprintf("%s is open", addr)
 			}
 			wg.Done()
 			<-limit
@@ -38,12 +40,14 @@ func scan(ip string, ports []string) {
 	}
 }
 
+// QuickScan scan only common ports.
 func QuickScan(ip string) {
 	commonPorts := "21,22,23,25,53,80,110,135,137,138,139,443,1433,1434,1521,3306,3389,5000,5432,5632,6379,8000,8080,8081,8443,9090,10051,11211,27017"
 	ports := strings.Split(commonPorts, ",")
 	scan(ip, ports)
 }
 
+// FullScan scan all ports.
 func FullScan(ip string) {
 	tmp := [65535]string{}
 	for i := 0; i < 65535; i++ {
@@ -72,11 +76,18 @@ func main() {
 
 	flag.StringVar(&ip, "ip", "", "IP address to scan")
 	flag.BoolVar(&fullMode, "f", false, "Full scan mode scans all ports, the default is off, the default only scans common ports")
+	flag.IntVar(&maxThread, "t", 1000, "Maximum number of threads")
 	flag.Parse()
 	if ip == "" {
 		flag.Usage()
 		return
 	}
+
+	go func() {
+		for s := range result {
+			fmt.Println(s)
+		}
+	}()
 
 	startTime := time.Now()
 	if fullMode {
@@ -88,6 +99,7 @@ func main() {
 	}
 
 	wg.Wait()
+	close(result)
 
 	takes := time.Since(startTime).Truncate(time.Millisecond)
 	fmt.Printf("Scan completed,it took %s.\n\n", takes)
