@@ -11,3 +11,11 @@ script:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+
+deploy:
+  provider: releases
+  api_key: "${GH_TOKEN}"
+  file: "portscan"
+  skip_cleanup: true
+  on:
+    tags: true
