@@ -3,16 +3,20 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/zs5460/ipconv"
 )
 
 var (
 	maxThread int
+	fullMode  bool
 )
 
 func isOpen(addr string) bool {
@@ -63,6 +67,31 @@ func QuickScan(ip string) {
 	scan(ip, ports)
 }
 
+// ScanIPS scan multiple IPs.
+func ScanIPS(ips []string) {
+	var wg sync.WaitGroup
+	lm := 10
+	if !fullMode {
+		lm = 1000
+	}
+	limiter := make(chan struct{}, lm)
+	for _, ip := range ips {
+		wg.Add(1)
+		limiter <- struct{}{}
+		go func(ipaddr string) {
+			defer wg.Done()
+			if fullMode {
+				FullScan(ipaddr)
+			} else {
+				QuickScan(ipaddr)
+			}
+			<-limiter
+		}(ip)
+
+	}
+	wg.Wait()
+}
+
 // FullScan scan all ports.
 func FullScan(ip string) {
 	tmp := [65535]string{}
@@ -86,12 +115,12 @@ func main() {
 `
 
 	ip := ""
-	fullMode := false
+	fullMode = false
 
 	fmt.Println(banner)
 
-	flag.StringVar(&ip, "ip", "", "IP address to scan")
-	flag.BoolVar(&fullMode, "f", false, "Full scan mode scans all ports, the default is off, the default only scans common ports")
+	flag.StringVar(&ip, "ip", "", "IP to be scanned, supports three formats:\n192.168.0.1 \n192.168.0.1-8 \n192.168.0.0/24")
+	flag.BoolVar(&fullMode, "f", false, "Scan all ports in full scan mode. The default is off. By default, only common ports are scanned.")
 	flag.IntVar(&maxThread, "t", 10000, "Maximum number of threads")
 	flag.Parse()
 	if ip == "" {
@@ -99,14 +128,21 @@ func main() {
 		return
 	}
 
-	startTime := time.Now()
-	if fullMode {
-		fmt.Println("Start a full scan...")
-		FullScan(ip)
-	} else {
-		fmt.Println("Start a quick scan...")
-		QuickScan(ip)
+	ips, err := ipconv.Parse(ip)
+	if err != nil {
+		log.Fatal(err)
 	}
+	startTime := time.Now()
+	if len(ips) > 1 {
+		ScanIPS(ips)
+	} else {
+		if fullMode {
+			FullScan(ip)
+		} else {
+			QuickScan(ip)
+		}
+	}
+
 	takes := time.Since(startTime).Truncate(time.Millisecond)
-	fmt.Printf("Scan completed,it took %s.\n\n", takes)
+	fmt.Printf("Scanning completed, taking %s.\n\n", takes)
 }
