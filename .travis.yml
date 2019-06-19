@@ -1,21 +1,36 @@
 language: go
 
 go:
+  - 1.12
   - tip
 
 before_install:
   - go get -t -v ./...
 
 script:
-  - go test -race -coverprofile=coverage.txt -covermode=atomic
+  - go test -v ./...
 
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+before_deploy:
+  - GOARCH=amd64 GOOS=linux   go build -o portscan-linux-amd64
+  - GOARCH=amd64 GOOS=darwin  go build -o portscan-darwin-amd64
+  - GOARCH=amd64 GOOS=windows go build -o portscan-windows-amd64.exe
 
 deploy:
   provider: releases
   api_key: "${GH_TOKEN}"
-  file: "portscan"
+  file: 
+    - portscan-linux-amd64
+    - portscan-darwin-amd64
+    - portscan-windows-amd64.exe
   skip_cleanup: true
   on:
     tags: true
+    all_branches: true
+    go: 1.12   
+
+notifications:
+  email:
+    recipients:
+        - zs5460@gmail.com
+    on_success: change
+    on_failure: always
