@@ -15,8 +15,9 @@ import (
 )
 
 var (
-	maxThread int
-	fullMode  bool
+	maxThread     int
+	fullMode      bool
+	specifiedPort string
 )
 
 func isOpen(addr string) bool {
@@ -60,11 +61,26 @@ func scan(ip string, ports []string) {
 
 }
 
+// FullScan scan all ports.
+func FullScan(ip string) {
+	tmp := [65536]string{}
+	for i := 0; i < 65536; i++ {
+		tmp[i] = strconv.Itoa(i + 1)
+	}
+	ports := tmp[:]
+	scan(ip, ports)
+}
+
 // QuickScan scan only common ports.
 func QuickScan(ip string) {
 	commonPorts := "21,22,23,25,53,80,110,135,137,138,139,443,1433,1434,1521,3306,3389,5000,5432,5632,6379,8000,8080,8081,8443,9090,10051,11211,27017"
 	ports := strings.Split(commonPorts, ",")
 	scan(ip, ports)
+}
+
+// SpecifiedScan scan specified port.
+func SpecifiedScan(ip, port string) {
+	scan(ip, strings.Split(port, ","))
 }
 
 // ScanIPS scan multiple IPs.
@@ -80,7 +96,9 @@ func ScanIPS(ips []string) {
 		limiter <- struct{}{}
 		go func(ipaddr string) {
 			defer wg.Done()
-			if fullMode {
+			if specifiedPort != "" {
+				SpecifiedScan(ipaddr, specifiedPort)
+			} else if fullMode {
 				FullScan(ipaddr)
 			} else {
 				QuickScan(ipaddr)
@@ -90,16 +108,6 @@ func ScanIPS(ips []string) {
 
 	}
 	wg.Wait()
-}
-
-// FullScan scan all ports.
-func FullScan(ip string) {
-	tmp := [65535]string{}
-	for i := 0; i < 65535; i++ {
-		tmp[i] = strconv.Itoa(i + 1)
-	}
-	ports := tmp[:]
-	scan(ip, ports)
 }
 
 func main() {
@@ -115,14 +123,21 @@ func main() {
 `
 
 	ip := ""
+	specifiedPort = ""
 	fullMode = false
 
 	fmt.Println(banner)
 
 	flag.StringVar(&ip, "ip", "", "IP to be scanned, supports three formats:\n192.168.0.1 \n192.168.0.1-8 \n192.168.0.0/24")
+
 	flag.BoolVar(&fullMode, "f", false, "Scan all ports in full scan mode. The default is off. By default, only common ports are scanned.")
+
 	flag.IntVar(&maxThread, "t", 10000, "Maximum number of threads")
+
+	flag.StringVar(&specifiedPort, "p", "", "Specific port to scan(0~65535)")
+
 	flag.Parse()
+
 	if ip == "" {
 		flag.Usage()
 		return
@@ -132,6 +147,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	if specifiedPort != "" {
+		p, err := strconv.Atoi(specifiedPort)
+		if err != nil || p < 0 || p > 65535 {
+			log.Fatal("Invalid Port")
+		}
+	}
+
 	startTime := time.Now()
 	if len(ips) > 1 {
 		ScanIPS(ips)
@@ -142,7 +165,6 @@ func main() {
 			QuickScan(ip)
 		}
 	}
-
 	takes := time.Since(startTime).Truncate(time.Millisecond)
 	fmt.Printf("Scanning completed, taking %s.\n\n", takes)
 }
