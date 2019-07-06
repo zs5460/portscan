@@ -10,8 +10,8 @@ A simple portscanner written in Go
 
 ## Usage
 
-```shell
-portscan -h
+```bash
+> portscan -h
 
     ____  ____  _____/ /_______________ _____ 
    / __ \/ __ \/ ___/ __/ ___/ ___/ __ \/ __ \
