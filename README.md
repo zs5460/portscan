@@ -4,6 +4,10 @@
 
 A simple portscanner written in Go
 
+## Download
+
+[releases](https://github.com/zs5460/portscan/releases/latest)
+
 ## Usage
 
 ```shell
