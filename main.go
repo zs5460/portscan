@@ -173,7 +173,7 @@ func main() {
 
 	flag.StringVar(&ip, "ip", "", "IP to be scanned, supports three formats:\n192.168.0.1 \n192.168.0.1-8 \n192.168.0.0/24")
 
-	flag.BoolVar(&fullMode, "f", false, "Scan all ports in full scan mode. The default is off. By default, only common ports are scanned.")
+	flag.BoolVar(&fullMode, "f", false, "Scan all TCP and UDP ports in full scan mode. The default is off. By default, only common TCP ports are scanned.")
 
 	flag.IntVar(&maxThread, "t", 10000, "Maximum number of threads")
 

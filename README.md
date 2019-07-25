@@ -2,7 +2,7 @@
 
 [![Build Status](https://www.travis-ci.org/zs5460/portscan.svg?branch=master)](https://www.travis-ci.org/zs5460/portscan)
 
-A simple portscanner written in Go
+A simple TCP and UDP portscanner written in Go
 
 ## Download
 
@@ -10,9 +10,10 @@ A simple portscanner written in Go
 
 ## Usage
 
-```bash
+```shell
 > portscan -h
 
+                      __                      
     ____  ____  _____/ /_______________ _____ 
    / __ \/ __ \/ ___/ __/ ___/ ___/ __ \/ __ \
   / /_/ / /_/ / /  / /_(__  ) /__/ /_/ / / / /
@@ -20,8 +21,7 @@ A simple portscanner written in Go
 /_/                                           
                                      © zs5460
 Usage of portscan:
-  -f    Scan all ports in full scan mode. The default is off. By default, only common ports are scan
-ned.
+  -f    Scan all TCP/UDP ports in full scan mode. The default is off. By default, only common TCP ports are scanned.
   -ip string
         IP to be scanned, supports three formats:
         192.168.0.1
