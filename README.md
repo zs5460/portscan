@@ -4,6 +4,11 @@
 
 A simple TCP and UDP portscanner written in Go
 
+## Performance
+
+* Scan all TCP and UDP ports of one host in 15 seconds.
+* Scan the common ports of all hosts in a Class C subnet in 2 seconds.
+
 ## Download
 
 [releases](https://github.com/zs5460/portscan/releases/latest)
