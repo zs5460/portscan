@@ -127,6 +127,7 @@ func SpecifiedScan(ip, port string) {
 
 // ScanIPS scan multiple IPs.
 func ScanIPS(ips []string) {
+
 	var wg sync.WaitGroup
 	lm := 10
 	if !fullMode {
@@ -140,8 +141,6 @@ func ScanIPS(ips []string) {
 			defer wg.Done()
 			if specifiedPort != "" {
 				SpecifiedScan(ipaddr, specifiedPort)
-			} else if fullMode {
-				FullScan(ipaddr)
 			} else {
 				QuickScan(ipaddr)
 			}
@@ -200,6 +199,10 @@ func main() {
 
 	startTime := time.Now()
 	if len(ips) > 1 {
+		if fullMode {
+			fmt.Println("Multi-host mode does not support full scan")
+			return
+		}
 		ScanIPS(ips)
 	} else {
 		if fullMode {
