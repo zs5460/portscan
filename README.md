@@ -41,3 +41,7 @@ Usage of portscan:
 ## Licence
 
 Released under MIT license, see [LICENSE](LICENSE) for details.
+
+## Special thanks
+
+[![goland](goland.png)](https://www.jetbrains.com/go/)
