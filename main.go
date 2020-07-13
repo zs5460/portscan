@@ -185,6 +185,8 @@ func main() {
 		return
 	}
 
+	checkLimit()
+
 	ips, err := ipconv.Parse(ip)
 	if err != nil {
 		log.Fatal(err)
