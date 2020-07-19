@@ -16,6 +16,6 @@ func checkLimit() {
 	if err == nil && rlimit.Cur < min {
 		fmt.Printf("WARNING: File descriptor limit %d is too low. "+
 			"At least %d is recommended. Fix with `ulimit -n %d`.\n", rlimit.Cur, min, min)
+		os.Exit(0)
 	}
-	os.Exit(-1)
 }
