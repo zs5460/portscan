@@ -71,11 +71,16 @@ func main() {
 
 	startTime := time.Now()
 	if len(ips) > 1 {
+		// if fullMode {
+		// 	fmt.Println("Multi-host mode does not support full scan")
+		// 	return
+		// }
 		if fullMode {
-			fmt.Println("Multi-host mode does not support full scan")
-			return
+			FullScanIPS(ips)
+		} else {
+			ScanIPS(ips)
 		}
-		ScanIPS(ips)
+
 	} else {
 		if fullMode {
 			FullScan(ip)

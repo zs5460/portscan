@@ -56,7 +56,7 @@ func isOpenUDP(addr string) bool {
 func scan(proto string, ip string, ports []string) {
 	var wg sync.WaitGroup
 	limiter := make(chan struct{}, maxThread)
-	result := make(chan string, 64)
+	result := make(chan string, 1024)
 	go func() {
 		for s := range result {
 			fmt.Println(s)
@@ -96,7 +96,7 @@ func FullScan(ip string) {
 	}
 	ports := tmp[:]
 	scan("tcp", ip, ports)
-	scan("udp", ip, ports)
+	//scan("udp", ip, ports)
 }
 
 // QuickScan scan only common ports.
@@ -115,10 +115,7 @@ func SpecifiedScan(ip, port string) {
 func ScanIPS(ips []string) {
 
 	var wg sync.WaitGroup
-	lm := 10
-	if !fullMode {
-		lm = 1000
-	}
+	lm := 1000
 	limiter := make(chan struct{}, lm)
 	for _, ip := range ips {
 		wg.Add(1)
@@ -135,4 +132,13 @@ func ScanIPS(ips []string) {
 
 	}
 	wg.Wait()
+}
+
+// FullScanIPS scan multiple IPs.
+func FullScanIPS(ips []string) {
+	fmt.Println("Sync scan multi hosts...")
+	for _, ip := range ips {
+		fmt.Println(ip)
+		FullScan(ip)
+	}
 }
