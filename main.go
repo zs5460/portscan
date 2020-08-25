@@ -69,8 +69,11 @@ func main() {
 
 	startTime := time.Now()
 
-	go ScanIPS(ips)
-	scan()
+	tasks := make(chan item)
+	done := make(chan int)
+	go genTask(tasks, ips)
+	go scan(tasks, done)
+	<-done
 
 	takes := time.Since(startTime).Truncate(time.Millisecond)
 	fmt.Printf("\nScanning completed, taking %s.\n\n", takes)

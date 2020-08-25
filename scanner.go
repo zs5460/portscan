@@ -25,8 +25,6 @@ func (i item) IsOpen() bool {
 	return isOpen(i.Addr())
 }
 
-var tasks = make(chan item, maxThread)
-
 func isOpen(addr string) bool {
 	conn, err := net.DialTimeout("tcp", addr, time.Second*1)
 	if err != nil {
@@ -71,7 +69,7 @@ func isOpenUDP(addr string) bool {
 	return true
 }
 
-func scan() {
+func scan(tasks <-chan item, done chan<- int) {
 	var wg sync.WaitGroup
 	limiter := make(chan struct{}, maxThread)
 	result := make(chan string, 1024)
@@ -96,19 +94,18 @@ func scan() {
 
 	wg.Wait()
 	close(result)
+	done <- 1
 
 }
 
-// FullScan scan all ports.
-func FullScan(ip string) {
+func addFullScan(tasks chan<- item, ip string) {
 	for i := 1; i < 65536; i++ {
 		tasks <- item{IP: ip, Port: i, Proto: "tcp"}
 		tasks <- item{IP: ip, Port: i, Proto: "udp"}
 	}
 }
 
-// QuickScan scan only common ports.
-func QuickScan(ip string) {
+func addQuickScan(tasks chan<- item, ip string) {
 	commonPorts := []int{21, 22, 23, 25, 53, 80, 110, 135, 137, 138, 139, 443, 465, 587, 1433, 1434, 1521, 3306, 3389, 3899, 4899, 5000, 5432, 5631, 5632, 6379, 8000, 8080, 8081, 8443, 9090, 10050, 10051, 11211, 27017}
 
 	for _, p := range commonPorts {
@@ -117,23 +114,21 @@ func QuickScan(ip string) {
 	tasks <- item{IP: ip, Port: 53, Proto: "udp"}
 }
 
-// SpecifiedScan scan specified port.
-func SpecifiedScan(ip, port string) {
+func addSpecifiedScan(tasks chan<- item, ip, port string) {
 	if p, err := strconv.Atoi(port); err == nil {
 		tasks <- item{IP: ip, Port: p, Proto: "tcp"}
 		tasks <- item{IP: ip, Port: p, Proto: "udp"}
 	}
 }
 
-// ScanIPS scan multiple IPs.
-func ScanIPS(ips []string) {
+func genTask(tasks chan item, ips []string) {
 	for _, ip := range ips {
 		if specifiedPort != "" {
-			SpecifiedScan(ip, specifiedPort)
+			addSpecifiedScan(tasks, ip, specifiedPort)
 		} else if fullMode {
-			FullScan(ip)
+			addFullScan(tasks, ip)
 		} else {
-			QuickScan(ip)
+			addQuickScan(tasks, ip)
 		}
 	}
 	close(tasks)
