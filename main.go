@@ -19,6 +19,7 @@ var (
 	maxThread     int
 	fullMode      bool
 	specifiedPort string
+	version       = "v0.0.9"
 )
 
 func main() {
@@ -31,12 +32,12 @@ func main() {
   / /_/ / /_/ / /  / /_(__  ) /__/ /_/ / / / /
  / .___/\____/_/   \__/____/\___/\__,_/_/ /_/ 
 /_/                                           
-                                     © zs5460
-`
+                                      © zs5460`
 
 	ip := ""
 
 	fmt.Println(banner)
+	fmt.Printf("%46s\n", version)
 
 	flag.StringVar(&ip, "ip", "", "IP to be scanned, supports three formats:\n192.168.0.1 \n192.168.0.1-8 \n192.168.0.0/24")
 
