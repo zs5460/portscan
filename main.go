@@ -35,8 +35,6 @@ func main() {
 `
 
 	ip := ""
-	specifiedPort = ""
-	fullMode = false
 
 	fmt.Println(banner)
 
@@ -46,7 +44,7 @@ func main() {
 
 	flag.IntVar(&maxThread, "t", 10000, "Maximum number of threads")
 
-	flag.StringVar(&specifiedPort, "p", "", "Specific port to scan(0~65535)")
+	flag.StringVar(&specifiedPort, "p", "", "Specific port to scan(1~65535)")
 
 	flag.Parse()
 
@@ -64,30 +62,17 @@ func main() {
 
 	if specifiedPort != "" {
 		p, err := strconv.Atoi(specifiedPort)
-		if err != nil || p < 0 || p > 65535 {
+		if err != nil || p < 1 || p > 65535 {
 			log.Fatal("Invalid Port")
 		}
 	}
 
 	startTime := time.Now()
-	if len(ips) > 1 {
-		// if fullMode {
-		// 	fmt.Println("Multi-host mode does not support full scan")
-		// 	return
-		// }
-		if fullMode {
-			FullScanIPS(ips)
-		} else {
-			ScanIPS(ips)
-		}
 
-	} else {
-		if fullMode {
-			FullScan(ip)
-		} else {
-			QuickScan(ip)
-		}
-	}
+	go ScanIPS(ips)
+	scan()
+
 	takes := time.Since(startTime).Truncate(time.Millisecond)
-	fmt.Printf("Scanning completed, taking %s.\n\n", takes)
+	fmt.Printf("\nScanning completed, taking %s.\n\n", takes)
+
 }
