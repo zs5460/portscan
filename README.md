@@ -1,6 +1,8 @@
 # portscan
 
-[![Build Status](https://www.travis-ci.org/zs5460/portscan.svg?branch=master)](https://www.travis-ci.org/zs5460/portscan)
+![status](https://img.shields.io/github/workflow/status/zs5460/test/release)
+[![Go Report Card](https://goreportcard.com/badge/github.com/zs5460/test)](https://goreportcard.com/report/github.com/zs5460/test)
+[![codecov](https://codecov.io/gh/zs5460/test/branch/main/graph/badge.svg?token=b7aeunEgyb)](https://codecov.io/gh/zs5460/test)
 
 A simple TCP and UDP portscanner written in Go
 
