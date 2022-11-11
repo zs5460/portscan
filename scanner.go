@@ -63,10 +63,9 @@ func isOpenUDP(addr string) bool {
 
 	buf := make([]byte, 256)
 	_, err = conn.Read(buf)
-	if err != nil {
-		return false
-	}
-	return true
+
+	return err == nil
+
 }
 
 func scan(tasks <-chan item, done chan<- int) {
@@ -101,12 +100,17 @@ func scan(tasks <-chan item, done chan<- int) {
 func addFullScan(tasks chan<- item, ip string) {
 	for i := 1; i < 65536; i++ {
 		tasks <- item{IP: ip, Port: i, Proto: "tcp"}
-		tasks <- item{IP: ip, Port: i, Proto: "udp"}
+		//tasks <- item{IP: ip, Port: i, Proto: "udp"}
 	}
 }
 
 func addQuickScan(tasks chan<- item, ip string) {
-	commonPorts := []int{21, 22, 23, 25, 53, 80, 110, 135, 137, 138, 139, 443, 465, 587, 1433, 1434, 1521, 3306, 3389, 3899, 4899, 5000, 5432, 5631, 5632, 6379, 8000, 8080, 8081, 8443, 9090, 10050, 10051, 11211, 27017}
+	commonPorts := []int{
+		21, 22, 23, 25, 53, 80, 81,
+		110, 135, 137, 138, 139, 389, 443, 465, 587,
+		1433, 1434, 1521, 3306, 3389, 3899, 4899,
+		5000, 5432, 5631, 5632, 5900, 6379, 7001, 8000, 8080, 8888,
+		8081, 8443, 9090, 9200, 9300, 10050, 10051, 11211, 27017}
 
 	for _, p := range commonPorts {
 		tasks <- item{IP: ip, Port: p, Proto: "tcp"}
