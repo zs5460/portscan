@@ -1,8 +1,8 @@
 # portscan
 
-![status](https://img.shields.io/github/workflow/status/zs5460/test/release)
-[![Go Report Card](https://goreportcard.com/badge/github.com/zs5460/test)](https://goreportcard.com/report/github.com/zs5460/test)
-[![codecov](https://codecov.io/gh/zs5460/test/branch/main/graph/badge.svg?token=b7aeunEgyb)](https://codecov.io/gh/zs5460/test)
+![status](https://img.shields.io/github/workflow/status/zs5460/portscan/release)
+[![Go Report Card](https://goreportcard.com/badge/github.com/zs5460/portscan)](https://goreportcard.com/report/github.com/zs5460/portscan)
+[![codecov](https://codecov.io/gh/zs5460/portscan/branch/main/graph/badge.svg?token=b7aeunEgyb)](https://codecov.io/gh/zs5460/portscan)
 
 A simple TCP and UDP portscanner written in Go
 
